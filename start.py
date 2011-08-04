@@ -13,5 +13,4 @@ from startuppoker_website import couchdb_repository
 if __name__ == '__main__':
     website.repository = couchdb_repository
     app = website.start()
-    app.debug = True
     app.run()
