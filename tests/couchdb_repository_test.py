@@ -7,7 +7,7 @@
 """
 
 import unittest
-from startuppoker_website.couchdb_repository import get_stake_for_player, get_pot, get_bet_round, get_last_move
+from startuppoker_spectator.couchdb_repository import get_stake_for_player, get_pot, get_bet_round, get_last_move
 
 class LastActionTest(unittest.TestCase):
 

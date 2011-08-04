@@ -8,7 +8,7 @@
 
 from flask import Flask, render_template, redirect, url_for
 from collections import deque
-from move import Move
+from startuppoker_spectator.move import Move
 
 class Card(object):
 

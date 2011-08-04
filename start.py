@@ -1,16 +1,16 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    Starter for the Startuppoker website.
+    Starter for the Startuppoker spectator.
 
     :copyright: (c) 2011 by it-agile GmbH
     :license: BSD, see LICENSE for more details.
 """
 
-from startuppoker_website import website
-from startuppoker_website import couchdb_repository
+from startuppoker_spectator import spectator
+from startuppoker_spectator import couchdb_repository
 
 if __name__ == '__main__':
-    website.repository = couchdb_repository
-    app = website.start()
+    spectator.repository = couchdb_repository
+    app = spectator.start()
     app.run()
