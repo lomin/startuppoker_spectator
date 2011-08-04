@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    Flask-App for displaying Startuppoker sessions.
+    Flask-app for displaying startuppoker sessions.
 
     :copyright: (c) 2011 by it-agile GmbH
     :license: BSD, see LICENSE for more details.

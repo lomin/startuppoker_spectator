@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    couchdb_repository test
+    Test for couchdb_repository.
 
     :copyright: (c) 2011 by it-agile GmbH
     :license: BSD, see LICENSE for more details.

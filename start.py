@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    Starter for the Startuppoker spectator.
+    Starter for the startuppoker spectator.
 
     :copyright: (c) 2011 by it-agile GmbH
     :license: BSD, see LICENSE for more details.
