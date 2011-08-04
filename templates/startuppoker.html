@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<meta charset="utf-8" />
+		<title>Startuppoker</title>
+
+		<link rel="stylesheet" href="/static/css/reset.css?v=1" />
+		<link rel="stylesheet" href="/static/css/960.css?v=1" />
+		<link rel="stylesheet" href="/static/css/text.css?v=1" />
+		<link rel="stylesheet" href="/static/css/startuppoker.css?v=1" />
+	</head>
+	<body>
+
+		{% macro input(players, prefix_list) -%}
+            {% for player in players %}
+                <div class="grid_2{{ prefix_list[loop.index0] }}" id="{{ loop.index0 }}">
+                    <table class="roundShadow{{ player.current_player }}">
+                        <tr><td colspan="2" class="playerName">{{ player.dealer }}</td></tr>
+                        <tr><td colspan="2" class="playerName">{{ player.name }}</td></tr>
+                        <tr>
+                            {% for card in player.cards %}
+                                <td>
+                                    <div class="pocketCard roundShadow {{ card.color }}">{{ card.rank }}</div>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        <tr><td colspan="2" class="moveInfo">{{ player.move }}</td></tr>
+                        <tr><td colspan="2" class="moveInfo">{{ player.stake }}</td></tr>
+                    </table>
+                </div>
+            {% endfor %}
+		{%- endmacro %}
+
+		<script language="Javascript">
+
+			function nextStep() {
+				window.location.href = "{{ next }}"
+			}
+			window.setTimeout(nextStep, 2000);
+		</script>
+
+
+
+		<div class="container_16">
+			<div class="grid_16" id="table">
+
+				{{ input([players[0], players[1], players[2]], [' prefix_3 alpha',' prefix_2',' prefix_2']) }} 
+
+				<div class="clear"></div>
+
+				{{ input([players[7]], [' prefix_1 alpha']) }} 
+
+					<div class="container_10">
+						<div class="grid_10">
+							{% for card in community_cards %}
+								<div class="grid_1{{ loop.cycle(' prefix_1','','',' prefix_1',' prefix_1')}}" id="1">
+                                    <div class="communityCard roundShadow {{ card.color }}">{{ card.rank }}</div>
+								</div>
+							{% endfor %}
+							<div class="clear"></div>
+							<div class="grid_4 prefix_3 alpha" id="1">
+								<div class="pot">Pot: {{ pot }}$</div>
+							</div>
+						</div>
+					</div>
+				{{ input([players[3]], ['']) }} 
+
+				<div class="clear"></div>
+
+				{{ input([players[6], players[5], players[4]], [' prefix_3 alpha',' prefix_2',' prefix_2']) }} 
+
+			</div>
+		</div>
+	</body>
+</html>
