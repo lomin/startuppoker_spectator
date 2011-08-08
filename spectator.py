@@ -87,9 +87,15 @@ def add_pocket_cards(players, history, step):
     for player in players:
         player.cards = convert_cards(pocket_cards[player.name])
 
+def get_dealer(players):
+    if len(players) > 2:
+        return players[2]
+    # in a heads up, the dealer is always the small blind
+    return players[0]
+
 def add_dealer_button(players, history):
     for player in players:
-        if player.name == repository.get_players(history)[2]:
+        if player.name == get_dealer(repository.get_players(history)):
             player.dealer = 'Dealer'
 
 def add_winners(players, history):
@@ -142,6 +148,3 @@ def show(server_name, table=0, hand=1, step=0):
     add_actions(players, history, step)
     add_stakes(players, history, step)
     return display_next_step(history, players, step, server_name, table, hand)
-
-def start():
-    return app

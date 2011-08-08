@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    Access of a Startuppoker history via CouchDB
+    Access of a startuppoker history via CouchDB
 
     :copyright: (c) 2011 by it-agile GmbH
     :license: BSD, see LICENSE for more details.

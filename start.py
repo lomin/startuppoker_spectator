@@ -12,5 +12,6 @@ from startuppoker_spectator import couchdb_repository
 
 if __name__ == '__main__':
     spectator.repository = couchdb_repository
-    app = spectator.start()
+    app = spectator.app
+    app.debug = True
     app.run()
