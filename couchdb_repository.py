@@ -15,7 +15,9 @@ TYPE_INFO = 'next_bet_round'
 MOVE = 'bet'
 STAKE = 'stake'
 
-server = couchdb.Server()
+COUCHDB_URL = 'http://127.0.0.1:8778/'
+
+server = couchdb.Server(COUCHDB_URL)
 
 def create_id(server_name, table, hand):
     def fill_with_zeros(string, index, zero_count):
