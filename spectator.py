@@ -37,7 +37,7 @@ class NoPlayer(Player):
 app = Flask(__name__)
 
 def create_players(history):
-    players = repository.get_players(history)
+    players = repository.get_player_names(history)
     return [Player(name=player) for player in players]
 
 def create_players_list(players):
@@ -87,15 +87,18 @@ def add_pocket_cards(players, history, step):
     for player in players:
         player.cards = convert_cards(pocket_cards[player.name])
 
-def get_dealer(players):
-    if len(players) > 2:
-        return players[2]
-    # in a heads up, the dealer is always the small blind
-    return players[0]
+def is_heads_up(players):
+    return len(players) == 2
+
+def get_dealer_name(players):
+    if (is_heads_up(players)):
+        return players[0]
+    return players[-1]
 
 def add_dealer_button(players, history):
+    player_names = repository.get_player_names(history)
     for player in players:
-        if player.name == get_dealer(repository.get_players(history)):
+        if player.name == get_dealer_name(player_names):
             player.dealer = 'Dealer'
 
 def add_winners(players, history):

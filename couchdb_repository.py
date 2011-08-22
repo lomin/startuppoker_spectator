@@ -34,7 +34,7 @@ def get_history(server_name, table, hand):
 def get_pot_share(document):
     return document['pot_share']
 
-def get_players(document):
+def get_player_names(document):
     return document['players']
 
 def get_winners(document):
