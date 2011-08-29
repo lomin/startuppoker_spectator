@@ -15,7 +15,6 @@
             {% for player in players %}
                 <div class="grid_2{{ prefix_list[loop.index0] }}" id="{{ loop.index0 }}">
                     <table class="roundShadow{{ player.current_player }}">
-                        <tr><td colspan="2" class="playerName">{{ player.dealer }}</td></tr>
                         <tr><td colspan="2" class="playerName">{{ player.name }}</td></tr>
                         <tr>
                             {% for card in player.cards %}
@@ -24,8 +23,11 @@
                                 </td>
                             {% endfor %}
                         </tr>
-                        <tr><td colspan="2" class="moveInfo">{{ player.move }}</td></tr>
-                        <tr><td colspan="2" class="moveInfo">{{ player.stake }}</td></tr>
+                        {% if player.name != ''%}
+                            <tr><td colspan="2" class="moveInfo">&nbsp;{{ player.move }}</td></tr>
+                            <tr><td colspan="2" class="moveInfo">&nbsp;{{ player.stake }}</td></tr>
+                            <tr><td colspan="2" class="playerName">&nbsp;{{ player.dealer }}</td></tr>
+                        {% endif %}
                     </table>
                 </div>
             {% endfor %}
