@@ -7,7 +7,7 @@
 """
 
 import couchdb
-from move import Move
+from startuppoker_spectator.move import Move
 
 TYPE_BET = 'bet'
 TYPE_INFO = 'next_bet_round'
@@ -15,9 +15,12 @@ TYPE_INFO = 'next_bet_round'
 MOVE = 'bet'
 STAKE = 'stake'
 
-COUCHDB_URL = 'http://localhost:8778/'
-
-server = couchdb.Server(COUCHDB_URL)
+try:
+    from local_settings import DATABASE_HOST, DATABASE_PORT
+    COUCHDB_URL = '%s:%s/' % (DATABASE_HOST, DATABASE_PORT)
+    server = couchdb.Server(COUCHDB_URL)
+except ImportError:
+    server = couchdb.Server()
 
 
 def create_id(server_name, table, hand):

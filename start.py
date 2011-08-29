@@ -10,8 +10,14 @@
 from startuppoker_spectator import spectator
 from startuppoker_spectator import couchdb_repository
 
+debug = False
+
 if __name__ == '__main__':
+    try:
+        from local_settings import debug
+    except ImportError:
+        pass
     spectator.repository = couchdb_repository
     app = spectator.app
-    app.debug = True
+    app.debug = debug
     app.run()
