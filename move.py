@@ -6,6 +6,7 @@
     :license: BSD, see LICENSE for more details.
 """
 
+
 class Move:
     NONE = 'NONE'
     FOLD = 'FOLD'
