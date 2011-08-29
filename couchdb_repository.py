@@ -37,6 +37,11 @@ def get_history(server_name, table, hand):
     return db[document_id]
 
 
+def get_history_by_id(server_name, document_id):
+    db = server[server_name]
+    return db[document_id]
+
+
 def get_pot_share(document):
     return document['pot_share']
 
@@ -145,7 +150,7 @@ def get_last_move(player_name, document, index):
 
     def regular_bet_or_fold(player_name, document, index):
         move, index = get_next_move_for_player(player_name, document, index)
-        if move == Move.NONE or index < 0:
+        if move == Move.NONE or move == Move.FOLD or index < 0:
             return Move.FOLD, ''
         else:
             return '', ''
@@ -153,8 +158,8 @@ def get_last_move(player_name, document, index):
     move, index = get_next_move_for_player(player_name, document, index)
     if index < 0:
         return '', ''
-    if move == Move.NONE:
-        return regular_bet_or_fold(player_name, document, index - 1)
     if move == Move.FOLD:
         return Move.FOLD, ''
+    if move == Move.NONE:
+        return regular_bet_or_fold(player_name, document, index - 1)
     return move, get_stake(get_action(document, index))
