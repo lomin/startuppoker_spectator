@@ -132,46 +132,73 @@ def add_current_player(players, history, step):
                 player.current_player = ' currentPlayer'
 
 
-def display_next_hand(server_name, table, hand):
-    return redirect(url_for('show', server_name=server_name,\
-            table=table, hand=hand + 1, step=0))
+def display_winners(history, players, step,
+        tournament_name, create_next_link):
+    return render_template('startuppoker.html',
+            pot=repository.get_pot_share(history),
+            players=create_players_list(players),
+            community_cards=get_community_cards(history, step - 1),
+            next=create_next_link())
 
 
-def display_winners(history, players, step, server_name, table, hand):
-    return render_template('startuppoker.html', \
-            pot=repository.get_pot_share(history), \
-            players=create_players_list(players), \
-            community_cards=get_community_cards(history, step - 1), \
-            next=url_for('show', server_name=server_name,\
-                table=table, hand=hand, step=step + 1))
+def display_next_step(history, players, step,
+        tournament_name, create_next_link):
+    return render_template('startuppoker.html',
+            pot=repository.get_pot(history, step),
+            players=create_players_list(players),
+            community_cards=get_community_cards(history, step),
+            next=create_next_link())
 
 
-def display_next_step(history, players, step, server_name, table, hand):
-    return render_template('startuppoker.html', \
-            pot=repository.get_pot(history, step), \
-            players=create_players_list(players), \
-            community_cards=get_community_cards(history, step), \
-            next=url_for('show', server_name=server_name,\
-                table=table, hand=hand, step=step + 1))
-
-
-@app.route("/<server_name>/")
-@app.route("/<server_name>/<int:table>/<int:hand>/<int:step>")
-def show(server_name, table=0, hand=1, step=0):
-    history = repository.get_history(server_name, table, hand)
+def show_hand(tournament_name, history, step, display_next_hand,
+        create_next_link):
     if step > repository.get_number_of_actions(history):
-        return display_next_hand(server_name, table, hand)
+        return display_next_hand()
 
     players = create_players(history)
     add_pocket_cards(players, history, step)
 
     if step == repository.get_number_of_actions(history):
         add_winners(players, history)
-        return display_winners(history, players, step,\
-                server_name, table, hand)
+        return display_winners(history, players, step,
+                tournament_name, create_next_link)
 
     add_dealer_button(players, history)
     add_current_player(players, history, step)
     add_actions(players, history, step)
     add_stakes(players, history, step)
-    return display_next_step(history, players, step, server_name, table, hand)
+    return display_next_step(history, players, step,
+            tournament_name, create_next_link)
+
+
+@app.route("/latest/<tournament_name>/<history_id>/<int:step>")
+def show_latest(tournament_name='spiel', history_id='1', step=1):
+    history = repository.get_history_by_id(tournament_name, history_id)
+    return show_hand(tournament_name, history, step,
+            lambda: redirect(url_for('find_and_show_latest',
+                tournament_name=tournament_name, history_id=history_id)),
+            lambda: url_for('show_latest', tournament_name=tournament_name,
+                history_id=history_id, step=step + 1))
+
+
+@app.route("/latest/<tournament_name>/")
+@app.route("/latest/<tournament_name>/<history_id>")
+def find_and_show_latest(tournament_name, history_id = ''):
+    last_10_ids = repository.get_last_games(tournament_name)
+    if history_id in last_10_ids and history_id != last_10_ids[-1]:
+        index = last_10_ids.index(history_id)
+        next_id = last_10_ids[index + 1]
+    else:
+        next_id = last_10_ids[0]
+    return show_latest(tournament_name, next_id, 0)
+
+
+@app.route("/<tournament_name>/")
+@app.route("/<tournament_name>/<int:table>/<int:hand>/<int:step>")
+def show(tournament_name, table=0, hand=1, step=0):
+    history = repository.get_history(tournament_name, table, hand)
+    return show_hand(tournament_name, history, step,
+            lambda: redirect(url_for('show', tournament_name=tournament_name,\
+            table=table, hand=hand + 1, step=0)),
+            lambda: url_for('show', tournament_name=tournament_name,
+                table=table, hand=hand, step=step + 1))

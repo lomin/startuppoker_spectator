@@ -42,6 +42,13 @@ def get_history_by_id(server_name, document_id):
     return db[document_id]
 
 
+def get_last_games(tournament_name):
+    db = server[tournament_name]
+    rows = db.view('_all_docs', None, descending=True, limit=10)
+    result = [r.key for r in rows]
+    result.reverse()
+    return result
+
 def get_pot_share(document):
     return document['pot_share']
 
