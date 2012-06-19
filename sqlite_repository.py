@@ -1,9 +1,16 @@
 from sqlalchemy import create_engine, MetaData, Column, Table, String,\
-    Integer, ForeignKey, select, and_
+    Integer, ForeignKey, select, and_, desc, func
 from sqlalchemy.exc import IntegrityError
 import couchdb
 import itertools
 import json
+from startuppoker_spectator.move import Move
+
+TYPE_BET = 'bet'
+TYPE_INFO = 'next_bet_round'
+# change 'bet' to 'move' in later versions
+MOVE = 'bet'
+STAKE = 'stake'
 
 def create_meta():
     engine = create_engine('sqlite:///startuppoker.sqlite')
@@ -108,7 +115,6 @@ def migrate_history(meta, document, game_id):
                 'stake': 0})
     history_table.insert().execute(insert)
 
-
 def migrate_document(meta, tournament_name, document):
     game_id = document['_id']
     migrate_game(meta, tournament_name, document, game_id)
@@ -133,6 +139,24 @@ class History(object):
     def __init__(self, meta, game_id):
         self.meta = meta
         self.game_id = game_id
+        self.game_table = Table('game', self.meta, autoload=True)
+        self.player_table = Table('player', self.meta, autoload=True)
+        self.winner_table = Table('winner', self.meta, autoload=True)
+        self.history_table = Table('history', self.meta, autoload=True)
+        self.history = select([self.history_table],
+                self.history_table.c.game_id == self.game_id).\
+                        execute().fetchall()
+        self.player_at_game_table = Table('player_at_game', self.meta, autoload=True)
+        self.player_at_game = select(
+                    [self.player_table.c.name,
+                     self.player_at_game_table.c.pocket_cards],
+                    self.player_at_game_table.c.game_id == self.game_id,
+                    from_obj=[self.player_at_game_table.join(self.player_table)],
+                    order_by=self.player_at_game_table.c.seat).\
+                            execute().fetchall()
+        self.game = self.game_table.select().\
+                where(self.game_table.c.id == self.game_id).\
+                execute().fetchone()
 
 def _create_id(tournament_name, table, hand):
     def fill_with_zeros(string, index, zero_count):
@@ -149,103 +173,146 @@ def get_history(tournament_name, table, hand):
     return get_history_by_id(tournament_name, game_id)
 
 def get_pot_share(history):
-    game_table = Table('game', history.meta, autoload=True)
-    query = game_table.select(). where(game_table.c.id == history.game_id)
-    game = query.execute().fetchone()
-    return game['final_pot']
+    return history.game['final_pot']
 
 def get_last_games(tournament_name):
-    pass
+    meta = create_meta()
+    game_table = Table('game', meta, autoload=True)
+    query = select(
+            [game_table.c.id], limit=10).\
+                    order_by(desc(game_table.c.id))
+    result = query.execute().fetchall()
+    result = [id[0] for id in result]
+    result.reverse()
+    return result
 
 def get_number_of_actions(history):
-    pass
-
-def get_last_move(player_name, history, step):
-    pass
-
-def get_stake_for_player(history, player_name, step):
-    pass
-
-def get_pot(history, step):
-    pass
-
-def get_bet_round(history, step):
-    pass
-
-class Player(object):
-
-    def __init__(self, name, seat):
-        self.name = name
-        self.seat = seat
-
-    def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return self.name
-
-def _get_player_table(history):
-    return Table('player',
-            history.meta, autoload=True)
+    return len(history.history)
 
 def get_player_names(history):
-    player_table = _get_player_table(history)
-    player_at_game_table = Table('player_at_game',
-            history.meta, autoload=True)
-    query = select(
-                [player_table.c.name],
-                player_at_game_table.c.game_id == history.game_id,
-                from_obj=[player_at_game_table.join(player_table)],
-                order_by=player_at_game_table.c.seat)
-    result = query.execute().fetchall()
-    return [row[0] for row in result]
+    return [row[0] for row in history.player_at_game]
 
 def get_winners(history):
     winner_table = Table('winner',
             history.meta, autoload=True)
-    player_table = _get_player_table(history)
     query = select(
-                [player_table.c.name],
+                [history.player_table.c.name],
                 winner_table.c.game_id == history.game_id,
-                from_obj=[winner_table.join(player_table)],)
+                from_obj=[winner_table.join(history.player_table)],)
     result = query.execute().fetchall()
     return [row[0] for row in result]
 
 def get_community_cards(history):
-    game_table = Table('game', history.meta, autoload=True)
-    query = game_table.select(). where(game_table.c.id == history.game_id)
-    game = query.execute().fetchone()
-    return json.loads(game['community_cards'])
+    return json.loads(history.game['community_cards'])
 
 def get_pocket_cards(history):
-    player_table = _get_player_table(history)
-    player_at_game_table = Table('player_at_game',
-            history.meta, autoload=True)
-    query  = select(
-        [player_table.c.name, player_at_game_table.c.pocket_cards],
-        player_at_game_table.c.game_id == history.game_id,
-        from_obj=[player_at_game_table.join(player_table)],)
-    result = query.execute().fetchall()
-    return dict((name, json.loads(hand)) for (name, hand) in result)
+    return dict((name, json.loads(hand)) for (name, hand) in history.player_at_game)
 
 def get_action(history, step):
-    player_table = _get_player_table(history)
-    history_table = Table('history', history.meta, autoload=True)
     query  = select(
-        [player_table.c.name, history_table.c.type],
+        [history.player_table.c.name,
+            history.history_table.c.type,
+            history.history_table.c.stake,
+            history.history_table.c.action,],
         and_(
-          history_table.c.game_id == history.game_id,
-          history_table.c.index == step),
-        from_obj=[history_table.join(player_table)])
+          history.history_table.c.game_id == history.game_id,
+          history.history_table.c.index == step),
+        from_obj=[history.history_table.join(history.player_table)])
     result = query.execute().fetchone()
-    return result
+    if result:
+        return {'player': result[0], 'info': result[1], 'stake': result[2], 'bet': result[3]}
+    else:
+        return {'player': '', 'info': TYPE_INFO, 'stake': 0, 'bet': ''}
+
 
 def is_for_player(action, player_name):
-    return action[0] == player_name
+    return action['player'] == player_name
 
 def is_bet(action):
-    return action[1] == 'bet'
+    return action['info'] == 'bet'
 
+def _get_move(action):
+    return action[MOVE]
+
+def get_stake(action):
+    return action[STAKE]
+
+def _get_type(action):
+    return action['info']
+
+
+def _is_type(action, action_type):
+    return _get_type(action) == action_type
+
+
+def is_bet(action):
+    return _is_type(action, TYPE_BET)
+
+
+def _is_info(action):
+    return _is_type(action, TYPE_INFO)
+
+def get_stake_for_player(document, player_name, index):
+    pot = 0
+    while index >= 0:
+        action = get_action(document, index)
+        if is_bet(action):
+            if is_for_player(action, player_name):
+                pot += get_stake(action)
+        else:
+            return pot
+        index -= 1
+    return pot
+
+
+def get_pot(document, step):
+    pot = 0
+    pot_for_current_bet_round = 0
+    for i in range(0, step + 1):
+        action = get_action(document, i)
+        if is_bet(action):
+            pot_for_current_bet_round += get_stake(action)
+        else:
+            pot += pot_for_current_bet_round
+            pot_for_current_bet_round = 0
+    return pot
+
+
+def get_bet_round(document, step):
+    bet_round = 0
+    for i in range(0, step + 1):
+        if _is_info(get_action(document, i)):
+            bet_round += 1
+    return bet_round
+
+
+def get_last_move(player_name, document, index):
+    def get_next_move_for_player(player_name, document, index):
+        while index >= 0:
+            action = get_action(document, index)
+            if is_bet(action):
+                if is_for_player(action, player_name):
+                    return _get_move(action), index
+            else:
+                return Move.NONE, index
+            index -= 1
+        return '', index
+
+    def regular_bet_or_fold(player_name, document, index):
+        move, index = get_next_move_for_player(player_name, document, index)
+        if move == Move.NONE or move == Move.FOLD or index < 0:
+            return Move.FOLD, ''
+        else:
+            return '', ''
+
+    move, index = get_next_move_for_player(player_name, document, index)
+    if index < 0:
+        return '', ''
+    if move == Move.FOLD:
+        return Move.FOLD, ''
+    if move == Move.NONE:
+        return regular_bet_or_fold(player_name, document, index - 1)
+    return move, get_stake(get_action(document, index))
 if __name__ == '__main__':
     migrate_couchdb('test', 100)
 
