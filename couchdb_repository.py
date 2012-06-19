@@ -23,7 +23,7 @@ except ImportError:
     server = couchdb.Server()
 
 
-def create_id(server_name, table, hand):
+def _create_id(server_name, table, hand):
     def fill_with_zeros(string, index, zero_count):
         return ':'.join([string, index.zfill(zero_count)])
 
@@ -33,7 +33,7 @@ def create_id(server_name, table, hand):
 
 def get_history(server_name, table, hand):
     db = server[server_name]
-    document_id = create_id(server_name, table, hand)
+    document_id = _create_id(server_name, table, hand)
     return db[document_id]
 
 
@@ -69,7 +69,7 @@ def get_community_cards(document):
     return document['communitycards']
 
 
-def get_move(action):
+def _get_move(action):
     return action[MOVE]
 
 
@@ -77,12 +77,12 @@ def get_stake(action):
     return action[STAKE]
 
 
-def get_type(action):
+def _get_type(action):
     return action['info']
 
 
-def is_type(action, action_type):
-    return get_type(action) == action_type
+def _is_type(action, action_type):
+    return _get_type(action) == action_type
 
 
 def is_for_player(action, player_name):
@@ -90,23 +90,23 @@ def is_for_player(action, player_name):
 
 
 def is_bet(action):
-    return is_type(action, TYPE_BET)
+    return _is_type(action, TYPE_BET)
 
 
-def is_info(action):
-    return is_type(action, TYPE_INFO)
+def _is_info(action):
+    return _is_type(action, TYPE_INFO)
 
 
-def get_actions(document):
+def _get_actions(document):
     return document['history']
 
 
 def get_number_of_actions(document):
-    return len(get_actions(document))
+    return len(_get_actions(document))
 
 
 def get_action(document, step):
-    return get_actions(document)[step]
+    return _get_actions(document)[step]
 
 
 def get_stake_for_player(document, player_name, index):
@@ -138,7 +138,7 @@ def get_pot(document, step):
 def get_bet_round(document, step):
     bet_round = 0
     for i in range(0, step + 1):
-        if is_info(get_action(document, i)):
+        if _is_info(get_action(document, i)):
             bet_round += 1
     return bet_round
 
@@ -149,7 +149,7 @@ def get_last_move(player_name, document, index):
             action = get_action(document, index)
             if is_bet(action):
                 if is_for_player(action, player_name):
-                    return get_move(action), index
+                    return _get_move(action), index
             else:
                 return Move.NONE, index
             index -= 1
