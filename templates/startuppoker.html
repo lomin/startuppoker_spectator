@@ -7,14 +7,18 @@
 		<link rel="stylesheet" href="/static/css/reset.css?v=1" />
 		<link rel="stylesheet" href="/static/css/960.css?v=1" />
 		<link rel="stylesheet" href="/static/css/text.css?v=1" />
-		<link rel="stylesheet" href="/static/css/startuppoker.css?v=1" />
+        <link rel="stylesheet" href="/static/css/startuppoker.css?v=1" />
+        <link rel="stylesheet" href="/static/css/d3LineChart.css?v=1" />
+        <script src="/static/js/d3.v2.min.js" type="text/javascript"></script>
+        <script src="/static/js/underscore-min.js" type="text/javascript"></script>
+        <script src="/static/js/d3LineChart.js" type="text/javascript"></script>
 	</head>
 	<body>
 
 		{% macro input(players, prefix_list) -%}
             {% for player in players %}
                 <div class="grid_2{{ prefix_list[loop.index0] }}" id="{{ loop.index0 }}">
-                    <table class="roundShadow{{ player.current_player }}">
+                    <table class="roundShadow {{ player.current_player }} {{ player.move }} {{ player.dealer }}">
                         <tr><td colspan="2" class="playerName">{{ player.name }}</td></tr>
                         <tr>
                             {% for card in player.cards %}
@@ -23,26 +27,33 @@
                                 </td>
                             {% endfor %}
                         </tr>
-                        {% if player.name != ''%}
-                            <tr><td colspan="2" class="moveInfo">&nbsp;{{ player.move }}</td></tr>
-                            <tr><td colspan="2" class="moveInfo">&nbsp;{{ player.stake }}</td></tr>
-                            <tr><td colspan="2" class="playerName">&nbsp;{{ player.dealer }}</td></tr>
+                        {% if player.name != '' %}
+                            {% if player.move != '' %}
+                                <tr><td colspan="2" class="moveInfo">{{ player.move }}</td></tr>
+                            {% endif %}
+                            {% if player.move != 'FOLD' and player.move  != ''%}
+                                <tr><td colspan="2" class="moveInfo">{{ player.stake }}$</td></tr>
+                            {% endif %}
+                            {% if player.dealer != '' %}
+                                <tr><td colspan="2" class="playerName">{{ player.dealer }}</td></tr>
+                            {% endif %}
                         {% endif %}
                     </table>
                 </div>
             {% endfor %}
 		{%- endmacro %}
-
-		<script language="Javascript">
-
-			function nextStep() {
-				window.location.href = "{{ next }}"
-			}
-			window.setTimeout(nextStep, 2000);
-		</script>
-
-
-
+        <div class="standings">
+            <table>
+                <tr>
+                    <td>player_0</td>
+                    <td>1000$</td>
+                </tr>
+                <tr>
+                    <td>player_1</td>
+                    <td>-1000$</td>
+                </td>
+            </table>
+        </div>
 		<div class="container_16">
 			<div class="grid_16" id="table">
 
@@ -71,7 +82,17 @@
 
 				{{ input([players[6], players[5], players[4]], [' prefix_3 alpha',' prefix_2',' prefix_2']) }} 
 
-			</div>
-		</div>
+            </div>
+        </div>
+        <div id="chart"></div>
+		<script language="Javascript">
+
+            d3.json('../../../standings/test.json/', draw);
+
+			function nextStep() {
+				window.location.href = "{{ next }}"
+			}
+			//window.setTimeout(nextStep, 2000);
+		</script>
 	</body>
 </html>

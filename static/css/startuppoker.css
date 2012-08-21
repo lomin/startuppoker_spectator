@@ -1,3 +1,6 @@
+.grid_2 {
+    height: 195px;
+}
 .clubs {
 	background: url(/static/img/clubs.png);
 	background-repeat:no-repeat;
@@ -23,7 +26,7 @@
 }
 
 .roundShadow {
-	-moz-box-shadow: 0px 2px 5px #000;
+	-moz-box-shadow: 0px 2px 5px #ff0000;
 	-webkit-box-shadow: 0px 2px 5px #000;
 	box-shadow: 0px 2px 5px #000;
 	-moz-border-radius: 3px;
@@ -90,9 +93,32 @@ body {
 
 table {
 	width: 90%;
+	background-color:#FFFFFF;
+}
+
+table.FOLD {
 	background-color:#BDBDBD;
 }
 
 table.currentPlayer {
-	background-color:#ffffff;
+	background-color: #b22222;
+}
+
+table.Winner {
+	background-color: #228b22;
+}
+
+.container_16 {
+    margin: 0px;
+}
+
+.standings {
+    position: absolute;
+    left: 1000px;
+    width: 500px;
+}
+
+.standings > table {
+	background-color: black;
+    color: white;
 }

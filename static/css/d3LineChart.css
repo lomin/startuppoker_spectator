@@ -1,0 +1,42 @@
+.data-line {
+	stroke-width: 2;
+	fill: none;
+	stroke-dasharray: 0;
+}
+
+.player_0 {
+	stroke: steelblue;
+}
+
+.player_1 {
+	stroke: red;
+}
+
+path {
+	stroke: #eee;
+	stroke-width: 2;
+	stroke-dasharray: 0;
+	fill: none;
+}
+
+.area {
+  	fill: none;
+}
+
+text {
+	font-family: Arial;
+	font-size: 8pt;
+	fill: #787878;
+}
+
+line {
+	stroke: #CDCDCD;
+	stroke-width: 0.5;
+	/* stroke-dasharray: 3 3; */
+	fill: none;
+}
+
+#chart {
+        margin: 0;
+}
+
