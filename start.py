@@ -7,18 +7,20 @@
     :license: BSD, see LICENSE for more details.
 """
 import sys
-sys.path.append('D:\\development\\')
+sys.path.append('../')
 from startuppoker_spectator import spectator
-from startuppoker_spectator import sqlite_repository
+from startuppoker_repository import sqlite_repository as repository
 
 debug = False
 
 if __name__ == '__main__':
+    spectator.repository = repository
     try:
-        from local_settings import debug
+        import local_settings
+        debug = local_settings.debug
+        repository.instance = local_settings.repository_instance
     except ImportError:
         pass
-    spectator.repository = sqlite_repository
     app = spectator.app
     app.debug = debug
-    app.run()
+    app.run('127.0.0.1', int(sys.argv[1]))

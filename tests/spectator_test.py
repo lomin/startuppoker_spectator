@@ -1,5 +1,4 @@
 import unittest
-
 import startuppoker_spectator.spectator as spectator
 
 class SpectatorRepositoryTest(unittest.TestCase):

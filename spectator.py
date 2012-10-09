@@ -9,7 +9,6 @@
 from flask import Flask, render_template, redirect, url_for, jsonify
 from collections import deque
 from startuppoker_spectator.move import Move
-from startuppoker_spectator.util import TYPE_INFO, TYPE_BET
 import random
 
 repository = None
@@ -17,6 +16,9 @@ repository = None
 # change 'bet' to 'move' in later versions
 MOVE = 'bet'
 STAKE = 'stake'
+
+TYPE_BET = 'bet'
+TYPE_INFO = 'next_bet_round'
 
 class Card(object):
 
@@ -274,7 +276,7 @@ def find_and_show_latest(tournament_name, history_id = ''):
 
 
 @app.route("/<tournament_name>/")
-@app.route("/<tournament_name>/<int:table>/<int:hand>/<int:step>")
+@app.route("/<tournament_name>/<table>/<int:hand>/<int:step>")
 def show(tournament_name, table=0, hand=1, step=0):
     history = repository.get_history(tournament_name, table, hand)
     return show_hand(tournament_name, history, step,
